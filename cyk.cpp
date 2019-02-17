@@ -65,10 +65,6 @@ void createTableBody(string str, vector<vector<vector<char>>> &table, vector<pai
 		}
 
 	}
-
-	for(int i = 0; i < str.length(); i++) {
-
-	}
 }
 
 void fillCells(vector<vector<vector<char>>> &table, vector<pair<char, string>> rules){
