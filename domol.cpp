@@ -57,6 +57,10 @@ class State {
 		int (*step)[20];
 
 		void setNextState() {
+			if(inputIndex == input.length()) {
+				return;
+			}
+
 			if(isalpha(input[inputIndex])) {
 				nextState = new State((*table)[id][0] - 1, inputIndex + (*step)[id], input, *table, *step);
 			} else if (isdigit(input[inputIndex])) {
@@ -90,7 +94,9 @@ class State {
 		}
 };
 
-int main() {
+int main(int argv, char** args) {
+
+//vilmos12>=231<>peter(*{ize}**){nem}$
 
 	int table[20][14]	= 
 	 {{ 2,	 4,	 6,	19,	 8,	19,	19,	12,	19,	14,	17,	 1,	19,	21},
@@ -117,13 +123,19 @@ int main() {
 	int step[20] = 
 		{ 1, 1, -1, 1,-1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0,-1};
 
-	string input = "vilmos12>=231<>peter(*{ize}**){nem}$ ";
-		
-	cout << input << endl;
+	while(true) {
+		cout << "Adj meg valami inputot:\n";
 
-	State state(0, 0, input, table, step);
+		string input;
+		getline(cin, input);
+		input += ' ';
 
-	state.logging();
+		State state(0, 0, input, table, step);
+
+		state.logging();
+
+		cout << endl << endl;
+	}
 
 	return 0;
 };

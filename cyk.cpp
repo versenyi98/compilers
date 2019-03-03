@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <ctype.h>
+#include <fstream>
 
 using namespace std;
 
@@ -44,11 +45,6 @@ class CYK {
 				table[word.length()].push_back(rombusz);
 				table[word.length()][i].push_back(word[i]);
 
-					if(isupper(word[i])) {
-						table[table.size() - 2][i].push_back('S');
-						continue;
-					}
-
 				for(int j = 0; j < rules.size(); j++) {
 					if(rules[j].second[0] == word[i]) {
 						table[table.size() - 2][i].push_back(rules[j].first);
@@ -82,27 +78,41 @@ class CYK {
 		}
 
 		void viewTable() {
+
 		//	Az utolsó sor elejére 0 tab szükséges, minden más sor elejére eggyel többi mint az előzőben
 			for(int i = 0; i < table.size() - 1; i++) {
 				for(int l = 0; l < table.size() - 2 - i; l++){
 					cout << '\t';
 				}
+				
+		//	A Rublikák határolója
+				cout << ' ';
+				for(int j = 0; j < table[i].size(); j++) {
+					cout << "_______________ ";
+					
+				}
+				cout << endl;
+
+				for(int l = 0; l < table.size() - 2 - i; l++){
+					cout << '\t';
+				}
+
 			//	Egy tab a rombusz értékei előtt és egy utána, így középre igazítottnak tűnik, és el is lehet határolni "szépen"
 				for(int j = 0; j < table[i].size(); j++) {
-					cout << ".\t";
+					cout << "|\t";
 					for(int k = 0; k < table[i][j].size(); k++) {
 						cout << table[i][j][k];
 					}
 					cout << '\t';
 				}
-				cout << ".\n";
+				cout << "|\n";
 			}
 
 		//	A string karaktereinek elhelyezése
 			for(int i = 0; i < table[table.size() - 1].size(); i++) {
-				cout << ".\t" << table[table.size() - 1][i][0] << "\t";
+				cout << "|\t" << table[table.size() - 1][i][0] << "\t";
 			}
-			cout << ".\n";
+			cout << "|\n";
 		}
 
 		void setWord(string word) {
@@ -132,42 +142,35 @@ class CYK {
 		string word;
 };
 
-int main() {
-	CYK cyk("((XdY)iZ)");
+int main(int argv, char** args) {
 
-	cyk.addRule(make_pair('S', "NS"));
-	cyk.addRule(make_pair('S', "BF"));
-	cyk.addRule(make_pair('F', "SG"));
-	cyk.addRule(make_pair('G', "CH"));
-	cyk.addRule(make_pair('G', "DH"));
-	cyk.addRule(make_pair('G', "IH"));
-	cyk.addRule(make_pair('H', "SE"));
-	cyk.addRule(make_pair('N', "n"));
-	cyk.addRule(make_pair('B', "("));
-	cyk.addRule(make_pair('E', ")"));
-	cyk.addRule(make_pair('C', "c"));
-	cyk.addRule(make_pair('D', "d"));
-	cyk.addRule(make_pair('I', "i"));
+	ifstream fin;
 
+	if(argv > 1) {
+		fin.open(args[1]);
+	}
+
+	if(!fin.is_open()) {
+		cerr << "Használat: ./cyk rules.txt" << endl;
+		return -1;
+	}
+
+	string input;
+			
+	cout << "Írj be egy inputot: \n";
+	cin >> input;
+
+	CYK cyk(input);
+	string temp;
+	while(getline(fin, temp)) {
+		cyk.addRule(make_pair(temp[0], temp.substr(2)));
+	}
+	
 	cyk.createTableBody();
 	cyk.fillCells();
 	cyk.viewTable();
+	cout << input << " szó eleme a nyelvnek? " << cyk.valid() << endl;
 
-	cout << "Generálja a grammatika a szót? : " << cyk.valid() << endl << endl;
-
-	cyk.setWord("(XcnZ)");
-	cyk.createTableBody();
-	cyk.fillCells();
-	cyk.viewTable();
-
-	cout << "Generálja a grammatika a szót? : " << cyk.valid() << endl << endl;
-
-	cyk.setWord("(XcZ)iY)");
-	cyk.createTableBody();
-	cyk.fillCells();
-	cyk.viewTable();
-
-	cout << "Generálja a grammatika a szót? : " << cyk.valid() << endl << endl;
 	return 0;
 }
 
