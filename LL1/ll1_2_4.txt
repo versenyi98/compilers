@@ -1,0 +1,4 @@
+S aAaab
+S bAbb
+A ~
+A a

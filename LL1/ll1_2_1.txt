@@ -1,0 +1,8 @@
+S aA
+S bBc
+A Bd
+A Cc
+B e
+B ~
+C f
+C ~
