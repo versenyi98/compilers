@@ -31,7 +31,6 @@ class LL1 {
 			
 		void fillHeaders() {
 			for (int i = 0; i < rules.size(); i++) {
-				//Szabályok bal oldáról az egyedi nagybetűk összegyűjtése
 				bool init = false;
 
 				for (int j = 0; j < headerCol.size(); j++) {
@@ -45,7 +44,6 @@ class LL1 {
 					headerCol.push_back(rules[i].first);
 				}
 
-				//Szabályok jobb oldaláról az egyedi kisbetűk összegyűjtése
 				for (int j = 0; j < rules[i].second.size(); j++) {
 					bool init = false;
 
@@ -55,18 +53,16 @@ class LL1 {
 							break;
 						}
 					}
-					if (!init && !isupper(rules[i].second[j])) {
+					if (!init && !isupper(rules[i].second[j]) && rules[i].second[j] != '~') {
 						headerCol.push_back(rules[i].second[j]);
 						headerRow.push_back(rules[i].second[j]);
 					}
 				}
 			}
 
-			//Rendezés, hogy nézzen ki valahogy a sorrend
 			std::sort(headerCol.begin(), headerCol.end());
 			std::sort(headerRow.begin(), headerRow.end());
 		
-			//# karakter is a táblázatban kell hogy szerepeljen
 			headerCol.push_back('#');
 			headerRow.push_back('#');
 		}
@@ -84,7 +80,6 @@ class LL1 {
 				}
 			}
 		}
-
 		
 		void NonTerminalToNonTerminal(char ch1, char ch2, int m, int n) {
 
@@ -108,7 +103,6 @@ class LL1 {
 				}
 			}
 		}
-		
 				
 		void fillFollow() {
 
@@ -153,7 +147,6 @@ class LL1 {
 					}
 				}
 			}
-
 		}
 		
 		pair<set<char>::iterator, bool> fillFollowRec(char ch, int i, int j) {
@@ -170,7 +163,6 @@ class LL1 {
 					changed = changed || inserted.second;
 				}
 			}
-			
 			inserted.second = changed;
 
 			return inserted;
@@ -187,7 +179,6 @@ class LL1 {
 			}
 
 			set<char>::iterator it;
-			cout << ch1 << " " << ch2 << endl;
 			for (it=follow[ch2].begin(); it!=follow[ch2].end(); ++it) {
 
 				inserted = follow[ch1].insert(*it);
@@ -224,6 +215,47 @@ class LL1 {
 		
 			inserted.second = changed;
 			return inserted;
+		}
+		
+		void fillTable() {
+		
+			for (int i = 0; i < headerCol.size(); i++) {
+				for (int j = 0; j < headerRow.size(); j++) {
+					table[headerCol[i]][headerRow[j]] = 0;
+					if (headerCol[i] == headerRow[j]) {
+						table[headerCol[i]][headerRow[j]] = -1;
+						if (headerCol[i] == '#') {
+							table[headerCol[i]][headerRow[j]] = -2;
+						}
+					}
+				}
+			}
+			
+			for (int i = 0; i < rules.size(); i++) {
+				fillTableRec(i, 0);
+			}		
+		}
+		
+		void fillTableRec(int i, int j) {
+			if (rules[i].second[j] == '~') {
+				set<char>::iterator it;
+				for (it=follow[rules[i].first].begin(); it!=follow[rules[i].first].end(); ++it) {
+					table[rules[i].first][*it] = i + 1;
+				}
+			
+			} else if (isupper(rules[i].second[j])) {
+				
+				set<char>::iterator it;
+				for (it=first[rules[i].second[j]].begin(); it!=first[rules[i].second[j]].end(); ++it) {
+					if (*it == '~') {
+						fillTableRec(i, j + 1);
+					} else {
+						table[rules[i].first][*it] = i + 1; 
+					}
+				}
+			} else {
+				table[rules[i].first][rules[i].second[j]] = i + 1;
+			}
 		}
 		
 		void showMap() {
@@ -271,6 +303,43 @@ class LL1 {
 			}
 		}
 	
+	
+		void parse(string input) {
+			input += "#";
+			string state = "S#";
+			vector<int> rulesUsed;
+
+			while (true) {
+
+				cout << input << ",\t" << state << ",\t(";
+				for (int i = 0; i < rulesUsed.size(); i++) {
+					cout << rulesUsed[i] << ' ';
+				}
+				cout << ")\n";
+
+				int number = table[state[0]][input[0]];
+
+				if (number > 0) {
+					if (rules[number - 1].second[0] != '~') {
+						state = rules[number - 1].second + state.substr(1);
+					} else {
+						state = state.substr(1);
+					}
+					rulesUsed.push_back(number);
+					
+				} else if (number == -1) {
+					input = input.substr(1);
+					state = state.substr(1);
+				} else if (number == -2) {
+					cout << "A szó eleme a nyelvnek..." << endl;
+					break;
+				} else {
+					cout << "Error" << endl;
+					break;
+				}
+			}
+		}
+	
 	private:
 		vector<pair<char, string>> rules;
 		map<char, map<char, int>> table;
@@ -299,7 +368,10 @@ int main(int argv, char** args) {
 	string temp;
 	while(getline(fin, temp)) {
 		ll1.addRule(make_pair(temp[0], temp.substr(2)));
+		cout << temp << endl;
 	}
+
+	cout << endl;
 
 	ll1.fillHeaders();
 	ll1.createFirstAndFollow();
@@ -313,12 +385,11 @@ int main(int argv, char** args) {
 	cout << endl << "Follow" << endl;
 	ll1.showFollow();
 	
+	ll1.fillTable();
 	
 	cout << endl;
 	ll1.showMap();
 	
-
-/*
 	string input;
 
 	cout << "Adjon meg egy inputot: ";
@@ -335,6 +406,6 @@ int main(int argv, char** args) {
 	}
 
 	cout << endl;
-*/
+
 	return 0;
 }
