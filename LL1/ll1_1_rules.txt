@@ -1,9 +1,0 @@
-S ABC
-A a
-A Bbc
-A Ccd
-B bBb
-B cCc
-C dDd
-C Dd
-D e
