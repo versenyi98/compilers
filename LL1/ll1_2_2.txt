@@ -1,8 +1,8 @@
-E TF
+S TF
 F +TF
 F ~
 T GU
 U *GU
 U ~
-G (E)
+G (S)
 G i
