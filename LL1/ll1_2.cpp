@@ -14,12 +14,13 @@ class LL1 {
 		LL1() {};
 		~LL1() {};
 
+	//Szabályok felvétele
 		void addRule(pair<char, string> rule) {
 			rules.push_back(rule);
 		}
 
+	//First és Follow map-ek létrehozása
 		void createFirstAndFollow() {
-		
 			for (int i = 0; i < headerCol.size(); i++) {
 				if (isupper(headerCol[i])) {
 					set<char> tmp;
@@ -28,7 +29,8 @@ class LL1 {
 				}
 			}
 		}
-			
+	
+	//A header vectorok megöltése, col: nem terminális, row: nem terminális és terminális
 		void fillHeaders() {
 			for (int i = 0; i < rules.size(); i++) {
 				bool init = false;
@@ -67,8 +69,10 @@ class LL1 {
 			headerRow.push_back('#');
 		}
 		
+	//First megtöltése
 		void fillFirst() {
 			for (int i = 0; i < rules.size(); i++) {
+			//Ha a szbály első eleme nem nagy akkor a first eleme
 				if (!isupper(rules[i].second[0])) {
 					first[rules[i].first].insert(rules[i].second[0]);
 				}
@@ -87,7 +91,8 @@ class LL1 {
 				if (ch2 == rules[i].first) {
 
 					if (!isupper(rules[i].second[0])) {
-						
+						//Ha lambda szabály tartozik a nem terminálishoz, akkor az eredeti szabály
+						//következő karaktere adhat információt a first-ről
 						if (rules[i].second[0] == '~' && rules[m].second.length() > n + 1) {
 							if (islower(rules[m].second[n + 1])) {
 								first[ch1].insert(rules[m].second[n + 1]);
@@ -97,7 +102,7 @@ class LL1 {
 						} else {
 							first[ch1].insert(rules[i].second[0]);
 						}
-					} else if (isupper(rules[i].second[n])) {
+					} else {
 						NonTerminalToNonTerminal(ch1, rules[i].second[n], i, n);
 					}
 				}
@@ -115,6 +120,7 @@ class LL1 {
 			
 			while (changed) {
 				changed = false;
+				
 				for (int i = 0; i < rules.size(); i++) {
 					for (int j = 0; j < rules[i].second.size(); j++) {
 
@@ -124,6 +130,7 @@ class LL1 {
 									inserted = follow[rules[i].second[j]].insert(rules[i].second[j + 1]);
 									changed = changed || inserted.second;
 								} else {
+									//Nem terminális follow-ja = a következő elem first-je
 									inserted = fillFollowRec(rules[i].second[j], i, j);
 									changed = changed || inserted.second;
 								}
@@ -132,6 +139,7 @@ class LL1 {
 					}
 				}
 				
+				//Szabály végén levő nem terminális followja = a bal oldal followja
 				for (int i = 0; i < rules.size(); i++) {
 					char ch = rules[i].second[rules[i].second.size() -1];
 					if (isupper(ch)) {
@@ -139,7 +147,7 @@ class LL1 {
 						changed = changed || inserted.second;
 					}
 				}
-				
+
 				for (int i = 0; i < rules.size(); i++) {
 					if (rules[i].second[0] == '~') {
 						inserted = fillFollowLambda(rules[i].first);
@@ -161,6 +169,12 @@ class LL1 {
 				if (*it != '~') {
 					inserted = follow[ch].insert(*it);
 					changed = changed || inserted.second;
+				} else {
+					if (j + 2 < rules[i].second.length()) {
+						fillFollowRec(ch, i, j + 1);
+					} else {
+						fillFollowEnd(ch, rules[i].first, i);
+					}
 				}
 			}
 			inserted.second = changed;
@@ -203,7 +217,8 @@ class LL1 {
 						for (it=first[rules[i].second[j + 1]].begin(); it!=first[rules[i].second[j + 1]].end(); ++it) {
 						
 							if (*it == '~') {
-								fillFollowEnd(rules[i].second[j], rules[i].first, i);								
+								fillFollowRec(rules[i].second[j], i, j + 1);
+								cout << "Meghívódik" << endl;								
 							} else {
 								inserted = follow[rules[i].second[j]].insert(*it);
 								changed = changed || inserted.second;	
@@ -302,7 +317,6 @@ class LL1 {
 				cout << endl;
 			}
 		}
-	
 	
 		void parse(string input) {
 			input += "#";
