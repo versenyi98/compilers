@@ -203,7 +203,7 @@ class LR0 {
 				
 					char ch;
 					
-					for (auto i: canonical[heap.size() - 1]) {
+					for (auto i: canonical[heap[heap.size() - 1].first]) {
 						ch = i.first;
 					}
 				
