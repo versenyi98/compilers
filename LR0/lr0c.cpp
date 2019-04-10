@@ -175,50 +175,44 @@ class LR0 {
 
 		void parse(string input) {
 		
-			string word = input;
-			word += "#";
-			
-			int state = 0;
-		
-			heap.push_back(make_pair(state, word));
-		
-			while (true) {
-		
-				cout << "#" << heap[heap.size() - 1].first + 1 << " " << heap[heap.size() - 1].second << endl;
-		
-				if (heap[heap.size() - 1].second[0] == '#' && heap[heap.size() -1].first == 1) {
-					cout << "A szó eleme a nyelvnek" << endl;
-					break;
-				}
-		
-				if (action[heap[heap.size() - 1].first] == 0) {
-				
-					if (table[heap[heap.size() - 1].second[0]][heap[heap.size() - 1].first] == 0) {
-						cout << "Error..." << endl;
-						break;
-					}
-				
-					heap.push_back(make_pair(table[heap[heap.size() - 1].second[0]][heap[heap.size() - 1].first] - 1, heap[heap.size() - 1].second.substr(1)));
-				} else {
-				
-					char ch;
+			heap.second = input + "#";
+			heap.first.push_back(make_pair('#', 1));
 					
-					for (auto i: canonical[heap[heap.size() - 1].first]) {
+			while (true) {
+
+				cout << heap.second << '\t';
+				for(int i = 0; i < heap.first.size(); i++) {
+					cout << heap.first[i].first << heap.first[i].second << " ";
+				}
+				cout << endl;				
+				
+				if (action[heap.first[heap.first.size() - 1].second - 1] == 0) {
+				
+					if (heap.first[heap.first.size() - 1].second == 1 && !heap.second.compare("A#")) {
+						cout << "Megoldás" << endl;
+						return;
+					}
+
+					if (heap.first[heap.first.size() - 1].second == 0) {
+						cout << "Nemm egészen jó a szó." << endl;
+						return;
+					} 
+				
+					heap.first.push_back(make_pair(heap.second[0], table[heap.second[0]][heap.first[heap.first.size() - 1].second - 1]));
+					heap.second = heap.second.substr(1);
+					
+				} else {
+					
+					char ch;
+					for (auto i: canonical[heap.first[heap.first.size() - 1].second - 1]) {
 						ch = i.first;
 					}
-				
-					int popNum = action[heap[heap.size() - 1].first];
-					for (int i = 0; i < popNum; i++) {
-
-						heap.pop_back();
-					}
 					
-					heap[heap.size() - 1].second = heap[heap.size() - 1].second.substr(popNum);
-					heap[heap.size() - 1].second = ch + heap[heap.size() - 1].second;
-				}
-
-				if (heap.size() > 5) {
-					break;
+					heap.second = ch + heap.second;
+					int num = action[heap.first[heap.first.size() - 1].second - 1];
+					for (int i = 0; i < num; i++) {
+						heap.first.pop_back();
+					}
 				}
 			}
 		}
@@ -249,7 +243,6 @@ class LR0 {
 				}
 				cout << endl;
 			}
-		
 		}
 
 		void printTable() {
@@ -274,8 +267,8 @@ class LR0 {
 				
 		map<char, map<int, int>> table;
 		map<int, int> action;				//0 -> léptetés, egyébként redukálás
-		vector<pair<int, string>> heap;
-};
+		pair<vector<pair<char, int>>, string> heap;
+	};
 
 int main (int argv, char** args) {
 		
